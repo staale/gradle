@@ -149,6 +149,27 @@ class PomParserTest extends Specification {
         descriptor.dependencies.length == 0
     }
 
+    @Issue("GRADLE-2173")
+    def "pom with packaging of type hk2-jar creates jar artifact"() {
+        when:
+        pomFile << """
+<project>
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>group-one</groupId>
+    <artifactId>artifact-one</artifactId>
+    <version>version-one</version>
+    <packaging>hk2-jar</packaging>
+</project>
+"""
+        and:
+        def descriptor = parsePom()
+
+        then:
+        descriptor.moduleRevisionId == moduleId('group-one', 'artifact-one', 'version-one')
+        hasArtifact(descriptor, 'artifact-one', 'hk2-jar', 'jar')
+        descriptor.dependencies.length == 0
+    }
+
     private ModuleDescriptor parsePom() {
         GradlePomModuleDescriptorParser.getInstance().parseDescriptor(ivySettings, pomFile.toURI().toURL(), false)
     }
